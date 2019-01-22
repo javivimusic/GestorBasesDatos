@@ -36,6 +36,9 @@ class BD {
 
         return $con;
     }
+    public function setBaseDatos($db){
+        $this->db=$db;
+    }
 
     public function select(string $c): array {
         $fila = [];

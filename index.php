@@ -3,13 +3,15 @@ spl_autoload_register(function ($nombre_clase) {
     include $nombre_clase . '.php';
 });
 
+session_start();
+
 if (isset($_POST['submit'])) {
     $host = $_POST['host'];
     $user = $_POST['user'];
     $pass = $_POST['pass'];
     $conexion = new BD($host, $user, $pass);
 
-    switch ($_POST['sumbit']) {
+    switch ($_POST['submit']) {
         case 'Conectar':
             if ($conexion->connect_errno == 0) {
                 $con = true;
@@ -20,6 +22,13 @@ if (isset($_POST['submit'])) {
             }
             break;
         case 'Gestionar':
+            $baseDatos=$_POST['bd'];
+            $user=$_POST['usuario'];
+            $pass=$_POST['password'];
+            $host=$_POST['hosts'];
+            $datosCon=["host"=>$host, "user"=>$user, "pass"=>$pass, "nombreBase"=>$baseDatos];
+            $_SESSION['bbdd']=$datosCon;
+            header("Location:tablas.php");
             break;
     }
 
@@ -44,12 +53,13 @@ and open the template in the editor.
             <fieldset>
                 <legend>Datos de conexión</legend>
                 <label>Host</label>
-                <input type="text" name="host" value="localhost">
+                <input type="text" name="host" value="">
                 <label>Usuario</label>
                 <input type="text" name="user" value="root">
                 <label>Password</label>
                 <input type="text" name="pass" value="">
                 <input type="submit" name="submit" value="Conectar">
+                
             </fieldset>
         </form>
 
@@ -63,6 +73,9 @@ and open the template in the editor.
                             echo"<input type='radio' name='bd' value='$info'>" . $info . "<br>";
                         }
                     }
+                    echo"<input type='hidden' name='usuario' value='$user'>";
+                    echo"<input type='hidden' name='password' value='$pass'>";
+                    echo"<input type='hidden' name='hosts' value='$host'>";
                     echo"<input type='submit' name='submit' value='Gestionar'>";
                     ?>
                 </fieldset>
