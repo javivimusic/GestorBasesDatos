@@ -41,8 +41,8 @@ $tabla = $datos['tabla'];
 
 $sentencia1 = "SELECT * FROM :table";
 $consulta = $miConexion->prepare($sentencia1);
-$file = ["table" => $tabla];
-$consulta->execute($file);
+
+$consulta->execute(array("table" => $tabla));
 var_dump($consulta);
 while ($f = $consulta->fetch()) {
     var_dump($f);
