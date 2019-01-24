@@ -22,7 +22,6 @@ if (isset($_SESSION['nombreTabla'])) {
 
 
 
-
 if (isset($_POST['submit'])) {
     switch ($_POST['submit']) {
         case 'Insertar':
@@ -32,19 +31,19 @@ if (isset($_POST['submit'])) {
         case 'Volver':
             header("Location:tablas.php");
             break;
+        case 'Editar':
+            $row=$_POST['datos'];
+            $_SESSION['fila']=$row;
+            header("Location:editar.php?mostrarDatos=true");
+            break;
+        case 'Borrar':
+            $row=$_POST['datos'];
+            $_SESSION['fila']=$row;
+            header("Location:editar.php?borrar=true");
+            break;
     }
 }
-if (isset($_POST['editar'])) {
-    $row = $_POST['editar'];
-    $_SESSION['fila'] = $row;
-    var_dump($row);
-    //header("Location:editar.php?mostrarDatos=true");
-}
-if (isset($_POST['borrar'])) {
-    $row = $_POST['borrar'];
-    $_SESSION['fila'] = $row;
-    header("Location:editar.php?borrar=true");
-}
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -67,26 +66,36 @@ if (isset($_POST['borrar'])) {
             <table>
                 <?php
                 echo "<tr>";
+                
                 $titulo = $conexion->select($sentencia2);
                 foreach ($titulo as $columnas => $nombre) {
-
+                    
                     echo "<th>$nombre[0]</th>";
+                    
                 }
                 echo "<th>Opciones</th></tr>";
-
+                
                 $fila = $conexion->select($sentencia1);
                 foreach ($fila as $dato => $columnas) {
+                    
                     echo "<tr>";
+                    
+                    $c=0;
                     foreach ($columnas as $posi => $info) {
                         echo "<td>" . $info . "</td>";
+                        echo "<input type='hidden' name=datos[".$titulo[$c][0]."] value=$columnas[$c]>";
+                        $c++;
                     }
-
-                    echo "<td><button type='submit' name='editar' value='$columnas'>Editar</button><td>";
-                    echo "<td><button type='submit' name='borrar' value=$columnas>Borrar</button><td></tr>";
+                    
+                    
+                    echo "<td><input type='submit' name='submit' value=Editar>";
+                    echo "<input type='submit' name='submit' value=Borrar></td>";
+                    
                 }
                 ?>
-
+                
             </table>
+            <input type='hidden' name='posicion' value='Insertar'>
             <input type='submit' name='submit' value='Insertar'>
             <input type='submit' name='submit' value='Volver'>
         </form>

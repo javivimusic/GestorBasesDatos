@@ -9,55 +9,27 @@ $mostrarDatos=$_GET['mostrarDatos'];
 $borrar=$_GET['borrar'];
 
 $datos=$_SESSION['bbdd'];
+$tabla = $_SESSION['nombreTabla'];
+$fila=$_SESSION['fila'];
 
-$host="mysql:host=".$datos['host'].";dbname=".$datos['nombreBase'];
-$user=$datos['user'];
-$pass=$datos['pass'];
+    $host = $datos['host'];
+    $base = $datos['nombreBase'];
+    $user = $datos['user'];
+    $pass = $datos['pass'];
+$conexion=new BD($host, $user,$pass,$base);
+$sentencia2 = "desc " . $tabla;
 
-    try{
-    //creamos una nueva conexion con PDO y realizamos las consultas
-    $conexion=new PDO($host,$user,$pass);
-    $fila=[];
-    $titulo=[];
-    
-    $sentencia="desc ".$datos['tabla'];
-    $consulta=$conexion->query($sentencia);
-    while($fe=$consulta->fetch(PDO::FETCH_NUM)){
-        $titulo[]=$fe;
-    }
-    
-} catch (PDOException $ex) {
-    echo "ERROR".$ex->getMessage();
-}
-if(isset($_POST['submit'])){    
+if (isset($_POST['submit'])){
     switch($_POST['submit']){
         case 'Actualizar':
-            $sentencia="UPDATE ".$datos['tabla']." WHERE ".$titulo[0][0]." = '".$cod."'";
-            $consulta=$conexion->exec($sentencia);
             break;
         case 'Cancelar':
-            header("Location:gestionarTablas.php?msj=Una fila actualizada");
+            header("Location:gestionarTablas.php");
+            exit();
             break;
     }
 }
-if($mostrarDatos){
-    $cod=$datos['cod'];
-    $sentencia="SELECT * FROM ".$datos['tabla']." WHERE ".$titulo[0][0]." = '".$cod."'";
-    $consulta=$conexion->query($sentencia);
-    while ($f=$consulta->fetch(PDO::FETCH_NUM)){
-        $fila[]=$f;
-    }
-}
-if($borrar){
-    $cod=$datos['cod'];
-    $sentencia="DELETE FROM ".$datos['tabla']." WHERE ".$titulo[0][0]." = '".$cod."'";
-    $consulta=$conexion->exec($sentencia);
-    if($consulta !=0){
-        header("Location:gestionarTablas?msj=true");
-    }else{
-        header("Location:gestionarTablas?msj=false");
-    }
-}
+
 
 
     ?>
@@ -76,8 +48,9 @@ and open the template in the editor.
         <?php if($campos) : ?>
         <form action="editar.php" method="POST">
             <fieldset>
-                <legende><?php echo "Nueva fila en la tabla ".$datos['tabla']."<br>" ?></legende>
+                <legende><?php echo "Nueva fila en la tabla ".$tabla."<br>" ?></legende>
                 <?php
+                $titulo=$conexion->select($sentencia2);
                 foreach($titulo as $columnas){
                     echo "<br>".$columnas[0]."<br><textarea name=".$columnas[0]."></textarea><br>";
                     
@@ -92,25 +65,20 @@ and open the template in the editor.
         <?php if($mostrarDatos) : ?>
         <form action="editar.php" method="POST">
             <fieldset>
-                <legende><?php echo "Editar producto ".$cod." de la tabla ".$datos['tabla']."<br>" ?></legende>
+                <legende><?php echo "Editar elemento de la tabla ".$tabla."<br>" ?></legende>
                 <?php
-                    foreach($fila as $dato => $colum){
-                        //como puede haber varias filas con el mismo codigo
-                        //inicializamos el contar a cero cada vez que encuentra una nueva fila
-                        $pos=0;
-                        foreach ($colum as $posi => $info){
-                            //el titulo de cada textarea lo mostramos sacando la posicion de cada campo
-                            //con el contador y en la posicion cero que es el nombre de cada campo
-                            echo "<br>".$titulo[$pos][0]."<br><textarea name=".$titulo[$pos][0].">".$info."</textarea><br>";
-                            $pos++;
-                        }
+                    $titulo=$conexion->select($sentencia2);
+                    $con=0;
+                    foreach($fila as $info){
+                        echo "<br>".$titulo[$cont][0]."<br><textarea name=".$titulo[$cont][0].">$info</textarea><br>";
+                        $cont++;
                     }
                 
                 ?>
                 
             </fieldset>
             <input type="submit" name="submit" value="Actualizar">
-            <input type="submit" name="submit" value="volver">
+            <input type="submit" name="submit" value="Cancelar">
         </form>
         <?php endif; ?>
     </body>
