@@ -47,6 +47,16 @@ and open the template in the editor.
     <head>
         <meta charset="UTF-8">
         <title></title>
+        <style>
+            table, tr{
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+            tr:nth-child(even){background-color: #f2f2f2;}
+
+            tr:hover {background-color: #ddd;}
+
+        </style>
     </head>
     <body>
         <form action="index.php" method="POST">
