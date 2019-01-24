@@ -1,34 +1,36 @@
 <?php
-
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 spl_autoload_register(function ($nombre_clase) {
     include $nombre_clase . '.php';
 });
 
 session_start();
-$datos=$_SESSION['bbdd'];
-$conexion=new BD($datos['host'],$datos['user'],$datos['pass']);
-$conexion->setBaseDatos($datos['nombreBase']);
-
-if ($conexion->connect_errno == 0) {
-    $con = true;
-    $consulta = "show tables from ".$datos['nombreBase'];
-    $bd = $conexion->select($consulta);
+$datos = $_SESSION['bbdd'];
+$host = $datos['host'];
+$user = $datos['user'];
+$pass = $datos['pass'];
+if (!isset($_SESSION['nombreTabla'])) {
+    $base = $datos['nombreBase'];
 } else {
-    $msj = "No se ha podido establecer la conexion" . $conexion->connect_error;
+    $base = $datos['nombreBase'];
+    echo$base;
 }
+$conexion = new BD($host, $user, $pass, $base);
+$sentencia = "show tables from $base";
+$result = $conexion->select($sentencia);
 
-if(isset($_POST['tabla'])){
-    $tabla=$_POST['tabla'];
-    $datos['tabla']=$tabla;
-    $_SESSION['tabla']=$datos;
-    header("Location:gestionarTablas.php");
+if (isset($_POST['submit'])) {
+    switch ($_POST['submit']) {
+        case 'volver':
+            $_SESSION['bbdd'] = $datos;
+            header("Location:index.php");
+            break;
+        default:
+            $tabla = $_POST['submit'];
+            $_SESSION['nombreTabla'] = $tabla;
+            header("Location:gestionarTablas.php");
+            break;
+    }
 }
-$conexion->cerrarCon();
 ?>
 <!DOCTYPE html>
 <!--
@@ -42,17 +44,19 @@ and open the template in the editor.
         <title></title>
     </head>
     <body>
-        <?php echo $msj?>
-        
+        <?php echo $msj ?>
+
         <form actio="tablas.php" method="POST">
             <fieldset>
                 <legend>Tablas de las base de datos de <?php echo$datos['nombreBase'] ?></legend>
                 <?php
-                foreach($bd as $tablas => $nombre){
-                    echo "<input type='submit' name='tabla' value='$nombre[0]'>";
+                foreach ($result as $tablas => $nombre) {
+                    echo "<button type='submit' name='submit' value='$nombre[0]'>$nombre[0]</button>";
                 }
                 ?>
+
             </fieldset>
+            <input type="submit" name="submit" value="volver">
         </form>
     </body>
 </html>

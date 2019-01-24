@@ -1,51 +1,49 @@
 <?php
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 spl_autoload_register(function ($nombre_clase) {
     include $nombre_clase . '.php';
 });
 
 
 session_start();
-$datos = $_SESSION['tabla'];
 
-/*
-  $miConexion = new BD($datos['host'], $datos['user'], $datos['pass']);
-  $miConexion->setBaseDatos($datos['nombreBase']);
+if (isset($_SESSION['nombreTabla'])) {
+    $datos = $_SESSION['bbdd'];
+    $tabla = $_SESSION['nombreTabla'];
 
-  $consulta = "selec * from " . $datos['tabla'];
-  $result = $miConexion->modificar($consulta);
-  $consulta2 = "desc " . $datos['tabla'];
-  $result2 = $miConexion->modificar($consulta);
-  var_dum($result);
-  var_dum($result2);
- */
+    $host = $datos['host'];
+    $base = $datos['nombreBase'];
+    $user = $datos['user'];
+    $pass = $datos['pass'];
 
-
-$host = "mysql:host=" . $datos['host'] . ";dbname=" . $datos['nombreBase'];
-$user = $datos['user'];
-$passwd = $datos['pass'];
-
-var_dump($datos);
-
-try {
-
-    $miConexion = new PDO($host, $user, $passwd);
-} catch (PDOException $ex) {
-    die("Error conectado a la base de datos " . $ex->getMessage());
+    $conexion = new BD($host, $user, $pass, $base);
+    $sentencia1 = "SELECT * FROM " . $tabla;
+    $sentencia2 = "desc " . $tabla;
 }
-$tabla = $datos['tabla'];
 
-$sentencia1 = "SELECT * FROM :table";
-$consulta = $miConexion->prepare($sentencia1);
 
-$consulta->execute(array("table" => $tabla));
-var_dump($consulta);
-while ($f = $consulta->fetch()) {
-    var_dump($f);
+
+
+if (isset($_POST['submit'])) {
+    switch ($_POST['submit']) {
+        case 'Insertar':
+            header("Location:editar.php?campos=true");
+            break;
+
+        case 'Volver':
+            header("Location:tablas.php");
+            break;
+    }
+}
+if (isset($_POST['editar'])) {
+    $row = $_POST['editar'];
+    $_SESSION['fila'] = $row;
+    var_dump($row);
+    //header("Location:editar.php?mostrarDatos=true");
+}
+if (isset($_POST['borrar'])) {
+    $row = $_POST['borrar'];
+    $_SESSION['fila'] = $row;
+    header("Location:editar.php?borrar=true");
 }
 ?>
 <!doctype html>
@@ -53,24 +51,45 @@ while ($f = $consulta->fetch()) {
     <head>
         <meta charset="UTF-8">
         <title>Document</title>
+        <style>
+            table, tr{
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+            tr:nth-child(even){background-color: #f2f2f2;}
+
+            tr:hover {background-color: #ddd;}
+
+        </style>
     </head>
     <body>
-        <table>
-            <?php
-//            foreach ($resultado2 as $index => $nombre) {
-//                echo "<th>$nombre[0]</th>";
-//            }
-            foreach ($fila as $nombre => $dato) {
+        <form method="POST" action="gestionarTablas.php">
+            <table>
+                <?php
                 echo "<tr>";
-                foreach ($dato as $columna => $info) {
-                    echo "<td>" . $info . "</td>";
+                $titulo = $conexion->select($sentencia2);
+                foreach ($titulo as $columnas => $nombre) {
+
+                    echo "<th>$nombre[0]</th>";
                 }
-                echo "</tr>";
-            }
-            ?>
+                echo "<th>Opciones</th></tr>";
 
-        </table>
+                $fila = $conexion->select($sentencia1);
+                foreach ($fila as $dato => $columnas) {
+                    echo "<tr>";
+                    foreach ($columnas as $posi => $info) {
+                        echo "<td>" . $info . "</td>";
+                    }
 
+                    echo "<td><button type='submit' name='editar' value='$columnas'>Editar</button><td>";
+                    echo "<td><button type='submit' name='borrar' value=$columnas>Borrar</button><td></tr>";
+                }
+                ?>
+
+            </table>
+            <input type='submit' name='submit' value='Insertar'>
+            <input type='submit' name='submit' value='Volver'>
+        </form>
     </body>
 </html>
 

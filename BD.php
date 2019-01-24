@@ -21,53 +21,51 @@ class BD {
     private $p;
     private $db;
 
-    public function __construct($h, $u, $p) {
+    public function __construct($h, $u, $p, $db) {
         $this->h = $h;
         $this->u = $u;
         $this->p = $p;
+        $this->db = $db;
         $this->conexion = $this->conexion();
     }
 
     private function conexion() {
-        $con = new mysqli($this->h, $this->u, $this->p);
-        if ($con->connect_errno) {
-            $this->error = "Error de conexion:" . $con->connect_error;
+
+        if (is_null($this->db)) {
+            $dsn = "mysql:host=" . $this->h . ";dbname=";
+        } else {
+            $dsn = "mysql:host=" . $this->h . ";dbname=$this->db";
+        }
+
+        try {
+            $atributos = [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8", PDO::ATTR_ERRMODE => true, PDO::ERRMODE_EXCEPTION => true];
+            $con = new PDO($dsn, $this->u, $this->p, $atributos);
+        } catch (PDOException $ex) {
+            $this->error = "Error conectado a la base de datos " . $ex->getMessage();
         }
 
         return $con;
     }
-    public function setBaseDatos($db){
-        $this->db=$db;
+
+    public function get_error() {
+        return $this->error;
     }
 
-    public function select(string $c): array {
+    public function get_conect() {
+        return $this->conexion;
+    }
+
+    public function select(string $consulta) {
         $fila = [];
-
-        if ($this->conexion == null) {
-            $this->conexion = $this->conexion();
-        }
-
-        $resutlado = $this->conexion->query($c);
-        /*
-         *  while ($f = $resutlado->fetch_row()) es igual que
-         *  $f = $resutlado->fetch_row();
-         *  while ($f != null)
-         */
-        while ($f = $resutlado->fetch_row()) {
+        $rslt = $this->conexion->query($consulta);
+        while ($f = $rslt->fetch(PDO::FETCH_NUM)) {
             $fila[] = $f;
         }
         return $fila;
     }
 
-    public function modificar(string $c) {
-        if ($rtn = $this->conexion->query($c) === true) {
-            return $rtn;
-        }
-        return $this->conexion->error;
-    }
+    public function insert(string $consulta) {
 
-    public function cerrarCon() {
-        $this->conexion->close();
     }
 
 }
