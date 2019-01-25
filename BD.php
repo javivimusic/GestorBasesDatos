@@ -22,11 +22,12 @@ class BD {
     private $db;
 
     public function __construct($h, $u, $p, $db) {
+        $this->error = null;
         $this->h = $h;
         $this->u = $u;
         $this->p = $p;
         $this->db = $db;
-        
+
         //dependiendo de si disponemos de la base de datos o no, hacemos unaç
         //conexión y otra
         if (is_null($this->db)) {
@@ -38,7 +39,7 @@ class BD {
         try {
             //establecemos la conexión y en el que caso de que de error
             //lo guardamos en el atributo $error
-            
+
             $atributos = [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8", PDO::ATTR_ERRMODE => true, PDO::ERRMODE_EXCEPTION => true];
             $this->conexion = new PDO($dsn, $this->u, $this->p, $atributos);
         } catch (PDOException $ex) {
@@ -50,13 +51,14 @@ class BD {
     public function get_error() {
         return $this->error;
     }
+
     //devolvemos la conexión
     public function get_conect() {
         return $this->conexion;
     }
 
     /**
-     * 
+     *
      * @param string $consulta
      * @return array
      * realizamos una cosulta de tipo selec normal
@@ -72,12 +74,28 @@ class BD {
     }
 
     /**
+     *
+     * @return boolean si estoy o no conectado a la base de datos
      * 
+     */
+    public function conectado() {
+        if (is_null($this->error))
+            return true;
+        return false;
+    }
+
+    /**
+     *
      * @param string $consulta
      * devolvemos un valor que es el numero de filas afectadas
      */
     public function insert(string $consulta) {
 
+    }
+
+    public function cerrarCon() {
+        if (is_null($this->error))
+            $this->conexion->close();
     }
 
 }

@@ -16,8 +16,12 @@ if (isset($_SESSION['nombreTabla'])) {
     $pass = $datos['pass'];
 
     $conexion = new BD($host, $user, $pass, $base);
-    $sentencia1 = "SELECT * FROM " . $tabla;
-    $sentencia2 = "desc " . $tabla;
+    if (is_null($conexion->get_conect())) {
+        $msj = $conexion->get_error();
+    } else {
+        $sentencia1 = "SELECT * FROM " . $tabla;
+        $sentencia2 = "desc " . $tabla;
+    }
 }
 
 
@@ -32,18 +36,17 @@ if (isset($_POST['submit'])) {
             header("Location:tablas.php");
             break;
         case 'Editar':
-            $row=$_POST['datos'];
-            $_SESSION['fila']=$row;
+            $row = $_POST['datos'];
+            $_SESSION['fila'] = $row;
             header("Location:editar.php?mostrarDatos=true");
             break;
         case 'Borrar':
-            $row=$_POST['datos'];
-            $_SESSION['fila']=$row;
+            $row = $_POST['datos'];
+            $_SESSION['fila'] = $row;
             header("Location:editar.php?borrar=true");
             break;
     }
 }
-
 ?>
 <!doctype html>
 <html lang="en">
@@ -62,43 +65,44 @@ if (isset($_POST['submit'])) {
         </style>
     </head>
     <body>
+        <h1><?php echo $msj ?></h1>
         <form method="POST" action="gestionarTablas.php">
             <table>
                 <?php
                 echo "<tr>";
-                
+
                 $titulo = $conexion->select($sentencia2);
                 foreach ($titulo as $columnas => $nombre) {
-                    
+
                     echo "<th>$nombre[0]</th>";
-                    
                 }
                 echo "<th>Opciones</th></tr>";
-                
+
                 $fila = $conexion->select($sentencia1);
                 foreach ($fila as $dato => $columnas) {
-                    
+
                     echo "<tr>";
-                    
-                    $c=0;
-                    foreach ($columnas as $posi => $info) {
+
+                    $c = 0;
+                    echo "<form action='gestionarTablas.php' method='POST'>";
+                    foreach ($columnas as $info) {
                         echo "<td>" . $info . "</td>";
-                        echo "<input type='hidden' name=datos[".$titulo[$c][0]."] value=$columnas[$c]>";
+                        echo "<input type='hidden' name=datos[" . $titulo[$c][0] . "] value=$info>";
                         $c++;
                     }
-                    
-                    
+
+
                     echo "<td><input type='submit' name='submit' value=Editar>";
-                    echo "<input type='submit' name='submit' value=Borrar></td>";
-                    
+                    echo "<input type='submit' name='submit' value=Borrar></td></form>";
                 }
                 ?>
-                
+
             </table>
             <input type='hidden' name='posicion' value='Insertar'>
             <input type='submit' name='submit' value='Insertar'>
             <input type='submit' name='submit' value='Volver'>
         </form>
+
     </body>
 </html>
 

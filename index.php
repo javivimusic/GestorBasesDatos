@@ -5,16 +5,16 @@ spl_autoload_register(function ($nombre_clase) {
 
 session_start();
 
+//comprobamos si existe la sesion y recuperamos los datos
 if (isset($_SESSION['bbdd'])) {
     $existe = $_SESSION['bbdd'];
     $host = $existe['host'];
     $user = $existe['user'];
     $pass = $existe['pass'];
     $conexion = new BD($host, $user, $pass, null);
-    if (is_null($conexion)) {
+    if (!$conexion->conectado()) {
         $msj = $conexion->get_error();
     } else {
-        $con = true;
         $sentencia = "show databases";
     }
 }
@@ -22,11 +22,11 @@ if (isset($_POST['submit'])) {
     $host = $_POST['host'];
     $user = $_POST['user'];
     $pass = $_POST['pass'];
-
     switch ($_POST['submit']) {
         case 'Conectar':
+
             $conexion = new BD($host, $user, $pass, null);
-            if (is_null($conexion->get_conect())) {
+            if (!$conexion->conectado()) {
                 $msj = $conexion->get_error();
             } else {
                 $con = true;
@@ -44,9 +44,10 @@ if (isset($_POST['submit'])) {
             header("Location:tablas.php");
             break;
         case 'Desconectar':
+            //para cuando nos guarde la session y nos queremos desconectar
             $con = false;
             session_destroy();
-            $conexion = null;
+            $conexion->cerrarCon();
             break;
     }
 }
@@ -74,6 +75,7 @@ and open the template in the editor.
         </style>
     </head>
     <body>
+        <h1><?php echo $msj ?></h1>
         <form action="index.php" method="POST">
             <fieldset>
                 <legend>Datos de conexión</legend>
@@ -88,10 +90,9 @@ and open the template in the editor.
             </fieldset>
         </form>
 
-        <?php
-        //echo $msj;
-        if ($con) :
-            ?>
+
+
+        <?php if ($conexion->conectado()) : ?>
             <form action="index.php" method="POST">
                 <fieldset>
                     <legend>Gestion de las bases de datos del host <?php echo $host ?></legend>
@@ -102,7 +103,7 @@ and open the template in the editor.
                             echo"<input type='radio' name='bd' value='$info'>" . $info . "<br>";
                         }
                     }
-
+                    //guardamos los datos en hiddens para luego poderlos recuperar
                     echo"<input type='hidden' name='host' value='$host'>";
                     echo"<input type='hidden' name='user' value='$user'>";
                     echo"<input type='hidden' name='pass' value='$pass'>";
@@ -112,6 +113,6 @@ and open the template in the editor.
                 <input type='submit' name='submit' value='Desconectar'>
             </form>
         <?php endif; ?>
-        <h1><?php echo $msj ?></h1>
+
     </body>
 </html>

@@ -15,8 +15,12 @@ if (!isset($_SESSION['nombreTabla'])) {
     echo$base;
 }
 $conexion = new BD($host, $user, $pass, $base);
-$sentencia = "show tables from $base";
-$result = $conexion->select($sentencia);
+if (is_null($conexion->get_conect())) {
+    $msj = $conexion->get_error();
+} else {
+    $sentencia = "show tables from $base";
+    $result = $conexion->select($sentencia);
+}
 
 if (isset($_POST['submit'])) {
     switch ($_POST['submit']) {
