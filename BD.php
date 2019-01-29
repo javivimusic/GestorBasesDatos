@@ -92,6 +92,17 @@ class BD {
     public function insert(string $consulta) {
 
     }
+    
+    public function borrar(array $fila, array $titulo, string $tabla){
+        $consulta="DELETE FROM $tabla WHERE";
+        $c=0;
+        foreach($fila as $dato){
+            $consulta = $consulta." AND ";
+            $consulta =$consulta .$titulo[$c][0]." = $dato";
+            $c++;
+        }
+        return $consulta;
+    }
 
     public function cerrarCon() {
         if (is_null($this->error))

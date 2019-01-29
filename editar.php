@@ -21,11 +21,13 @@ if (is_null($conexion->get_conect())) {
     $msj = $conexion->get_error();
 } else {
     $sentencia2 = "desc " . $tabla;
+    $titulo = $conexion->select($sentencia2);
 }
 
 if ($borrar) {
-    $sentencia = "DELETE FROM $tabla";
-    header("Location:gestionarTablas.php?msj=Datos borrados");
+    var_dump($fila);
+    echo $conexion->borrar($fila, $titulo, $tabla);
+    //header("Location:gestionarTablas.php?msj=Datos borrados");
     exit();
 }
 
@@ -64,7 +66,7 @@ and open the template in the editor.
                 <fieldset>
                     <legende><?php echo "Nueva fila en la tabla " . $tabla . "<br>" ?></legende>
                     <?php
-                    $titulo = $conexion->select($sentencia2);
+                    
                     foreach ($titulo as $columnas) {
                         echo "<br>" . $columnas[0] . "<br><textarea name=" . $columnas[0] . "></textarea><br>";
                     }
