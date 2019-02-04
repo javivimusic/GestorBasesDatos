@@ -29,6 +29,7 @@ if (isset($_SESSION['nombreTabla'])) {
 if (isset($_POST['submit'])) {
     switch ($_POST['submit']) {
         case 'Insertar':
+
             header("Location:editar.php?campos=true");
             break;
 
@@ -43,6 +44,7 @@ if (isset($_POST['submit'])) {
         case 'Borrar':
             $row = $_POST['datos'];
             $_SESSION['fila'] = $row;
+
             header("Location:editar.php?borrar=true");
             break;
     }
@@ -73,7 +75,7 @@ if (isset($_POST['submit'])) {
 
                 $titulo = $conexion->select($sentencia2);
                 foreach ($titulo as $columnas => $nombre) {
-
+                    $campos[] = $nombre[0];
                     echo "<th>$nombre[0]</th>";
                 }
                 echo "<th>Opciones</th></tr>";
@@ -85,9 +87,10 @@ if (isset($_POST['submit'])) {
 
                     $c = 0;
                     echo "<form action='gestionarTablas.php' method='POST'>";
+
                     foreach ($columnas as $info) {
                         echo "<td>" . $info . "</td>";
-                        echo "<input type='hidden' name=datos[" . $titulo[$c][0] . "] value=$info>";
+                        echo "<input type='hidden' name=datos[" . $campos[$c] . "] value= '" . $info . "'>";
                         $c++;
                     }
 
@@ -98,7 +101,6 @@ if (isset($_POST['submit'])) {
                 ?>
 
             </table>
-            <input type='hidden' name='posicion' value='Insertar'>
             <input type='submit' name='submit' value='Insertar'>
             <input type='submit' name='submit' value='Volver'>
         </form>

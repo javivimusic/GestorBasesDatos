@@ -76,7 +76,7 @@ class BD {
     /**
      *
      * @return boolean si estoy o no conectado a la base de datos
-     * 
+     *
      */
     public function conectado() {
         if (is_null($this->error))
@@ -86,22 +86,50 @@ class BD {
 
     /**
      *
-     * @param string $consulta
-     * devolvemos un valor que es el numero de filas afectadas
+     * @param array $datos
+     * @param array $columnas
+     * @param string $tabla
+     * @return boolean
+     * nos devuelve true si ha podido insertar la final
      */
-    public function insert(string $consulta) {
+    public function insert(array $datos, array $columnas, string $tabla) {
+        $consulta = "INSERT INTO $tabla VALUES( ";
+        foreach ($columnas as $nombre) {
+            $consulta = $consulta . ":$nombre , ";
+        }
 
+        $sentencia = substr($consulta, 0, strlen($consulta) - 2);
+        $sentencia = $sentencia . ")";
+
+        $preparada = $this->conexion->prepare($sentencia);
+        if ($preparada->execute($datos))
+            return true;
+
+        return false;
     }
-    
-    public function borrar(array $fila, array $titulo, string $tabla){
-        $consulta="DELETE FROM $tabla WHERE";
-        $c=0;
-        foreach($fila as $dato){
-            $consulta = $consulta." AND ";
-            $consulta =$consulta .$titulo[$c][0]." = $dato";
+
+    /**
+     *
+     * @param array $fila
+     * @param array $titulo
+     * @param string $tabla
+     * @return string
+     * devolvemos un valor que es el número de filas borradas
+     */
+    public function borrar(array $fila, array $titulo, string $tabla) {
+        $consulta = "DELETE FROM $tabla WHERE ";
+        $c = 0;
+        foreach ($fila as $dato) {
+
+            $consulta = $consulta . $titulo[$c] . " = '$dato' AND ";
             $c++;
         }
-        return $consulta;
+
+        $sentencia = substr($consulta, 0, strlen($consulta) - 4);
+
+        $registros = $this->conexion->exec($consulta);
+        return $registros;
+//        return $sentencia;
     }
 
     public function cerrarCon() {

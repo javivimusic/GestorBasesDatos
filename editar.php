@@ -21,21 +21,37 @@ if (is_null($conexion->get_conect())) {
     $msj = $conexion->get_error();
 } else {
     $sentencia2 = "desc " . $tabla;
-    $titulo = $conexion->select($sentencia2);
+    $consulta = $conexion->select($sentencia2);
+    foreach ($consulta as $columnas => $nombre) {
+        $titulo[] = $nombre[0];
+    }
 }
 
 if ($borrar) {
-    var_dump($fila);
-    echo $conexion->borrar($fila, $titulo, $tabla);
-    //header("Location:gestionarTablas.php?msj=Datos borrados");
+    $resultado = $conexion->borrar($fila, $titulo, $tabla);
+    if (resutlado != 0) {
+        $msj = "Fila borrada con exito";
+    } else {
+        $msj = "No se ha podido borrar la fila";
+    }
+    header("Location:gestionarTablas.php?msj=$msj");
     exit();
 }
 
 if (isset($_POST['submit'])) {
     switch ($_POST['submit']) {
         case 'Insertar':
-            $sentencia = "INSERT INTO $tabla VALUES()";
-            header("Location:gestionarTablas.php?msj=Datos borrados");
+            foreach ($titulo as $nombre) {
+                $insertar[":$nombre"] = $_POST[$nombre];
+            }
+            $c = $conexion->insert($insertar, $titulo, $tabla);
+            if ($c) {
+                $msj = "fila insertada";
+            } else {
+                $msj = "no se ha podido insertar la fila";
+            }
+
+            header("Location:gestionarTablas.php?msj=$msj");
             break;
         case 'Actualizar':
             $sentencia = "UPDATE $tabla SET";
@@ -66,9 +82,8 @@ and open the template in the editor.
                 <fieldset>
                     <legende><?php echo "Nueva fila en la tabla " . $tabla . "<br>" ?></legende>
                     <?php
-                    
-                    foreach ($titulo as $columnas) {
-                        echo "<br>" . $columnas[0] . "<br><textarea name=" . $columnas[0] . "></textarea><br>";
+                    foreach ($titulo as $nombre) {
+                        echo "<br>" . $nombre . "<br><textarea name=" . $nombre . "></textarea><br>";
                     }
                     ?>
 
@@ -80,13 +95,12 @@ and open the template in the editor.
         <?php if ($mostrarDatos) : ?>
             <form action="editar.php" method="POST">
                 <fieldset>
-                    <legende><?php echo "Editar elemento de la tabla " . $tabla . "<br>" ?></legende>
+                    <legende><?php echo "Editar elemento de la tabla " . $tabla ?></legende>
                     <?php
-                    $titulo = $conexion->select($sentencia2);
-                    $con = 0;
+                    $cont = 0;
                     //$titulo[$cont][0]=> $con 0 nos permite sacar el titulo de las columnas y asignarlos a los campos
                     foreach ($fila as $info) {
-                        echo "<br>" . $titulo[$cont][0] . "<br><textarea name=" . $titulo[$cont][0] . ">$info</textarea><br>";
+                        echo "<br>" . $titulo[$cont] . "<br><textarea name=" . $titulo[$cont] . ">$info</textarea><br>";
                         $cont++;
                     }
                     ?>
